@@ -5,6 +5,14 @@ require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 
 //require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/relevebank.class.php';
 
+function limit_string(?string $text, int $length = 255, bool $fixed = false): string {
+    if ($text === null) {
+        return $fixed ? str_repeat(' ', $length) : '';
+    }
+    $limited = substr($text, 0, $length);
+    return $fixed ? str_pad($limited, $length) : $limited;
+}
+
 $langs->load("bankimport@bankimport");
 
 llxHeader('', 'Bankauszüge importieren');
@@ -34,7 +42,7 @@ if (!empty($_FILES['statement']['tmp_name']) && $accountid > 0) {
     $handle = fopen($filename, "r");
     if ($handle) {
         
-        // date;label;amount;oper;ref;categorie;transaction_id;bank_other;iban_other;owner_other
+        // date;datev;label;amount;oper;ref;categorie;transaction_id;bank_other;iban_other;owner_other
         $row = 0;
         while (($data = fgetcsv($handle, null, ";")) !== FALSE) {
             $row++;
@@ -44,15 +52,19 @@ if (!empty($_FILES['statement']['tmp_name']) && $accountid > 0) {
                 substr($data[0], 5, 2),
                 substr($data[0], 8, 2),
                 substr($data[0], 0, 4));
-            $label  = $data[1];
-            $amount = price2num($data[2]);
-            $oper   = trim($data[3]) ?: 'VIR'; // Fallback
-            $ref       = trim($data[4]); // Zahlungsreferenz
-            $categorie = (int) $data[5]; // Kategorie-ID (oder 0 wenn leer)
-            $transaction_id = $data[6];
-            $bank_other = $data[7];
-            $iban_other = $data[8];
-            $owner_other = $data[9];
+            $datev  = dol_mktime(0, 0, 0,
+                substr($data[1], 5, 2),
+                substr($data[1], 8, 2),
+                substr($data[0], 0, 4));
+            $label  = limit_string($data[2]);
+            $amount = price2num($data[3]);
+            $oper   = trim($data[4]) ?: 'VIR'; // Fallback
+            $ref       = trim($data[5]); // Zahlungsreferenz
+            $categorie = (int) $data[6]; // Kategorie-ID (oder 0 wenn leer)
+            $transaction_id = $data[7];
+            $bank_other = $data[8];
+            $iban_other = $data[9];
+            $owner_other = $data[10];
             $import_key = trim($transaction_id);
             if(empty($import_key)) {
                 $import_key = implode('|', array(
@@ -60,11 +72,10 @@ if (!empty($_FILES['statement']['tmp_name']) && $accountid > 0) {
                     trim($owner_other),       // Kontoinhaber Aussteller
                     number_format($amount, 2, '.', ''), // Betrag normiert
                     trim($label),              // Verwendungszweck / Label
-                    trim(ref)           // Referenz
+                    trim($ref)           // Referenz
                 ));
-                $import_key = sha1($import_key);
+                $import_key = substr(sha1($import_key), 0, 14);
             }
-            $datev = null;
             $amount_main_currency = null;
             $num_releve = '';
             
@@ -94,9 +105,9 @@ if (!empty($_FILES['statement']['tmp_name']) && $accountid > 0) {
                     $iban_other,
                     );
                 if ($bankline_id > 0) {
-                    $desc = $iban_other.", ".$owner_other.", ".$bank_other.", ".$amount;
                     $sql = "UPDATE ".MAIN_DB_PREFIX."bank SET import_key = '".$db->escape($import_key)."' WHERE rowid = ".((int) $bankline_id);
                     $db->query($sql);
+                    $desc = $iban_other.", ".$owner_other.", ".$bank_other.", ".$amount;
                     print '<p style="color:green">Zeile erfolgreich importiert: '.$desc.'</p>';
                     $db->commit();
                 } else {
