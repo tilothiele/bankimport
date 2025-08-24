@@ -1,0 +1,46 @@
+name: Build Release
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'   # Trigger nur bei Tags im Format X.Y.Z
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout Repo
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Setup PHP 8
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      # 3. Composer install
+      - name: Install dependencies
+        run: composer install --no-dev --optimize-autoloader
+
+      # 4. Generate module_descriptor.json und .env
+      - name: Generate config files
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          sed "s/{{VERSION}}/$TAG/g" build/module_descriptor.json > module_descriptor.json
+          echo "VERSION=$TAG" > .env
+
+      # 5. Pack alles in ZIP
+      - name: Create ZIP
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          zip -r "bankimport-$TAG.zip" ./*
+
+      # 6. Release mit ZIP
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: bankimport-*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
