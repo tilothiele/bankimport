@@ -6,8 +6,6 @@ require_once DOL_DOCUMENT_ROOT . '/custom/bankimport/core/modules/BankImportHelp
 
 class modBankImport extends DolibarrModules
 {
-    public $version;
-    
     /**
      * Constructor
      */
@@ -27,7 +25,6 @@ class modBankImport extends DolibarrModules
         $this->family = "financial";
         $this->name = "BankImport";
         $this->description = "Import von Kontoauszügen";
-        $this->version = $version;
         $this->const_name = 'MAIN_MODULE_BANKIMPORT';
         $this->special = 0;
         $this->picto = 'fa-money-bill-transfer'; // pictogram
