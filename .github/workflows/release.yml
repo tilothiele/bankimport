@@ -37,10 +37,13 @@ jobs:
           echo "VERSION=$TAG" > .env
 
       # 5. Pack alles in ZIP
-      - name: Create ZIP
+      - name: Create zip
         run: |
-          TAG="${GITHUB_REF_NAME}"
-          zip -r "bankimport-$TAG.zip" ./*
+          TAG=${GITHUB_REF##*/}
+          mkdir -p dist/bankimport
+          rsync -av --exclude 'dist' --exclude '.git' --exclude '.github' ./ dist/bankimport/
+          cd dist
+          zip -r ../bankimport-$TAG.zip bankimport
 
       # 6. Release mit ZIP
       - name: Create GitHub Release
