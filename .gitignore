@@ -3,3 +3,6 @@
 module_descriptor.json
 composer.lock
 
+!build/
+!build/**
+
