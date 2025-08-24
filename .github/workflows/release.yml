@@ -5,6 +5,11 @@ on:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'   # Trigger nur bei Tags im Format X.Y.Z
 
+permissions:
+  contents: write   # wichtig für Release-Upload
+#  packages: write   # falls du Composer-Pakete pushen würdest
+#  id-token: write   # für OIDC (z. B. wenn du Secrets nutzt)
+
 jobs:
   build:
     runs-on: ubuntu-latest
