@@ -1,0 +1,47 @@
+{
+  "name": "BankImport",
+  "desc": "Import von Kontoauszügen in die Dolibarr-Bankkonten",
+  "version": "{{VERSION}}",
+  "family": "financial",
+  "picto": "generic",
+  "module_position": 500,
+  "dirs": [
+    "/bankimport"
+  ],
+  "depends": [],
+  "requiredby": [],
+  "conflictwith": [],
+  "langfiles": [
+    "bankimport@bankimport"
+  ],
+  "phpmin": "7.4",
+  "dolibarr_min": "16.0.0",
+  "dolibarr_max": "24.0.0",
+  "rights": [
+    {
+      "id": 104001,
+      "desc": "Bankauszüge importieren",
+      "default": "1",
+      "perm": {
+        "read": "1",
+        "write": "1",
+        "delete": "0"
+      }
+    }
+  ],
+  "menus": [
+    {
+      "id": "bankimport_menu",
+      "fk_menu": "fk_mainmenu=bank",
+      "type": "left",
+      "titre": "Kontoauszüge importieren",
+      "url": "/custom/bankimport/import.php",
+      "langs": "bankimport@bankimport",
+      "position": 100,
+      "enabled": "1",
+      "perms": "1",
+      "target": "",
+      "user": 0
+    }
+  ]
+}
