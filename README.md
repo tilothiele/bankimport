@@ -1,5 +1,7 @@
 # Import of Bank Statement File
 
+License: MIT (see License.txt
+
 * The import file is a csv File. The first line ist skipped as headers.
 * Field separator is a semicolon ';'.
 * Record separator is newline '\n'.

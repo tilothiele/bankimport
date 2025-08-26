@@ -26,6 +26,7 @@ class modBankImport extends DolibarrModules
         $this->name = "BankImport";
         $this->description = "Import von Kontoauszügen";
         $this->const_name = 'MAIN_MODULE_BANKIMPORT';
+        $this->license = 'MIT';
         $this->special = 0;
         $this->picto = 'bank-import-logo@bankimport'; // pictogram
         $this->editor_name = 'tilo.thiele@hamburg.de';
