@@ -13,14 +13,14 @@ class modBankImport extends DolibarrModules
     {
         global $langs, $conf;
         $this->db = $db;
-        
-        $this->version = BankImportHelper::getEnv('VERSION', 'unknown');
-        
+
+        $this->version = '1.0.0';
+
         // Unique ID (custom modules > 100000)
         $this->numero = 104001;
-        
+
         $this->rights_class = 'bankimport';
-        
+
         // Where the module shows up in Setup
         $this->family = "financial";
         $this->name = "BankImport";
@@ -28,18 +28,28 @@ class modBankImport extends DolibarrModules
         $this->const_name = 'MAIN_MODULE_BANKIMPORT';
         $this->license = 'MIT';
         $this->special = 0;
-        $this->picto = 'bank-import-logo@bankimport'; // pictogram
-        $this->editor_name = 'tilo.thiele@hamburg.de';
-        
+        $this->picto = 'bank-import-logo@bankimport';
+        $this->editor_name = 'Tilo Thiele';
+        $this->editor_url = 'mailto:tilo.thiele@hamburg.de';
+
         // Default module options
         $this->module_parts = array();
         $this->dirs = array();
+        //$this->config_page_url = array('setup.php@bankimport');
         $this->config_page_url = array();
         $this->depends = array();
         $this->requiredby = array();
         $this->phpmin = array(7, 4);
         $this->langfiles = array("bankimport@bankimport");
-                
+
+        // --- Permissions definition ---
+        $r = 0;
+        $this->rights[$r][0] = $this->numero + $r;
+        $this->rights[$r][1] = 'Bankauszüge importieren';
+        $this->rights[$r][3] = 1;
+        $this->rights[$r][4] = 'import';
+        $r++;
+
         // --- Menu definition ---
         $r = 0;
         $this->menu[$r++] = array(

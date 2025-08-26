@@ -1,24 +1,27 @@
 <?php
+/* Copyright (C) 2024 Tilo Thiele <tilo.thiele@hamburg.de>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 require '../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
-require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
+require_once DOL_DOCUMENT_ROOT.'/custom/bankimport/core/class/BankImport.class.php';
 
-function limit_string(?string $text, int $length = 255, bool $fixed = false): string {
-    if ($text === null) {
-        return $fixed ? str_repeat(' ', $length) : '';
-    }
-    $limited = substr($text, 0, $length);
-    return $fixed ? str_pad($limited, $length) : $limited;
-}
-
-function ddmmyy2dol_date(string $s) {
-    $dd = substr($s, 0, 2);
-    $mm = substr($s, 3, 2);
-    $yyyy = substr($s, 6, 2);
-    if(!empty($yyyy)) {
-        $yyyy = '20' . $yyyy;
-    }
-    return dol_mktime(0, 0, 0, $mm, $dd, $yyyy);
+// Security check - check for bankimport rights
+if (!$user->rights->bankimport->import) {
+    accessforbidden();
 }
 
 $langs->load("bankimport@bankimport");
@@ -27,134 +30,181 @@ llxHeader('', $langs->trans("BANKIMPORT_Title"));
 
 print load_fiche_titre($langs->trans("BANKIMPORT_Title"));
 
-// Bankkonto auswählen
+// Get parameters
 $accountid = GETPOST('accountid', 'int');
-$encoding  = GETPOST('encoding', 'alpha'); // UTF-8 oder ISO-8859-1
+$encoding = GETPOST('encoding', 'alpha'); // UTF-8 oder ISO-8859-1
+$action = GETPOST('action', 'alpha');
 
-if (empty($accountid)) {
-    print "<p style=\"color:red\">" . $langs->trans("BANKIMPORT_Choose_account") . "</p>";
+// Token validation is handled by Dolibarr automatically
+
+// Initialize BankImport object
+$bankImport = new BankImport($db);
+
+// Handle form submission
+if ($action == 'upload') {
+    // Validate required fields first
+    $errors = array();
+
+    // Check if bank account is selected
+    if (empty($accountid) || $accountid == 0 || $accountid == '0') {
+        $errors[] = $langs->trans("BANKIMPORT_Choose_account");
+    } else {
+        // Verify that the bank account exists
+        $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "bank_account WHERE rowid = " . ((int) $accountid);
+        $resql = $db->query($sql);
+        if (!$resql || $db->num_rows($resql) == 0) {
+            $errors[] = $langs->trans("BANKIMPORT_Invalid_account");
+        }
+    }
+
+    // Check if file is uploaded
+    if (empty($_FILES['statement']['tmp_name'])) {
+        $errors[] = $langs->trans("BANKIMPORT_Choose_file");
+    }
+
+    // Display errors if any
+    if (!empty($errors)) {
+        foreach ($errors as $error) {
+            setEventMessages($error, null, 'errors');
+        }
+    } else {
+        // All validations passed, proceed with import
+        $bankImport->setAccountId($accountid);
+        $bankImport->setEncoding($encoding);
+
+        // Validate file
+        if (!$bankImport->validateFile($_FILES['statement'])) {
+            setEventMessages($bankImport->error, null, 'errors');
+        } else {
+            // Process file
+            $result = $bankImport->processFile($_FILES['statement']['tmp_name']);
+
+            // Display results
+            if ($result['success'] > 0) {
+                setEventMessages($langs->trans("BANKIMPORT_Success_imported", $result['success']), null, 'mesgs');
+            }
+
+            if ($result['skipped'] > 0) {
+                setEventMessages($langs->trans("BANKIMPORT_Skipped_imported", $result['skipped']), null, 'warnings');
+            }
+
+            if (!empty($result['errors'])) {
+                foreach ($result['errors'] as $error) {
+                    setEventMessages($error, null, 'errors');
+                }
+            }
+        }
+    }
 }
 
-$form = new Form($db);
+// Display form
 print '<form action="'.$_SERVER["PHP_SELF"].'" method="post" enctype="multipart/form-data">';
 print '<input type="hidden" name="token" value="'.newToken().'">';
-print $langs->trans("BANKIMPORT_Bank_account") . ': ';
+print '<input type="hidden" name="action" value="upload">';
+
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre">';
+print '<td colspan="2">'.$langs->trans("BANKIMPORT_Import_Form").'</td>';
+print '</tr>';
+
+// Bank account selection
+print '<tr class="oddeven">';
+print '<td class="fieldrequired">'.$langs->trans("BANKIMPORT_Bank_account").'</td>';
+print '<td>';
+$form = new Form($db);
 print $form->select_comptes($accountid, 'accountid', 0, '', 1, 0, 'all');
+print '<span class="fieldrequired" style="color: red;">*</span>';
+print '</td>';
+print '</tr>';
 
-// Upload
-print '<br><br>' . $langs->trans("BANKIMPORT_File_label") . ': <input type="file" name="statement">';
+// File upload
+print '<tr class="oddeven">';
+print '<td class="fieldrequired">'.$langs->trans("BANKIMPORT_File_label").'</td>';
+print '<td>';
+print '<input type="file" name="statement" accept=".csv,text/csv,text/plain" required>';
+print '</td>';
+print '</tr>';
 
-// Encoding Dropdown
-print '<br><br>Encoding: ';
+// Encoding selection
+print '<tr class="oddeven">';
+print '<td>'.$langs->trans("BANKIMPORT_Encoding").'</td>';
+print '<td>';
 print '<select name="encoding">';
-$encodings = array('UTF-8' => 'UTF-8', 'ISO-8859-1' => 'ISO-8859-1');
+$encodings = array('ISO-8859-1' => 'ISO-8859-1', 'UTF-8' => 'UTF-8');
 foreach ($encodings as $key => $label) {
     $selected = ($encoding == $key) ? 'selected' : '';
     print '<option value="'.$key.'" '.$selected.'>'.$label.'</option>';
 }
 print '</select>';
+print '</td>';
+print '</tr>';
 
-print '<br><br><input type="submit" class="button" value="' . $langs->trans("BANKIMPORT_Importieren_label") . '">';
-print '</form><br>';
+// Submit button
+print '<tr class="oddeven">';
+print '<td colspan="2" class="center">';
+print '<input type="submit" class="button" id="submitButton" value="'.$langs->trans("BANKIMPORT_Importieren_label").'" disabled>';
+print '</td>';
+print '</tr>';
 
-// --- Upload behandeln ---
-if (!empty($_FILES['statement']['tmp_name']) && $accountid > 0) {
-    $filename = $_FILES['statement']['tmp_name'];
-    $handle = fopen($filename, "r");
-    if ($handle) {
-        $row = 0;
-        while (($data = fgetcsv($handle, 0, ";")) !== FALSE) {
-            $row++;
-            if ($row == 1) continue; // Kopfzeile überspringen
-            
-            // Encoding konvertieren
-            foreach ($data as &$field) {
-                if ($encoding && strtoupper($encoding) !== 'UTF-8') {
-                    $field = iconv($encoding, "UTF-8//TRANSLIT", $field);
-                }
-            }
-            
-            $dateo  = ddmmyy2dol_date($data[1]);
-            $datev  = ddmmyy2dol_date($data[2]);
-            $label  = limit_string($data[4]);
-            $amount = price2num($data[14]);
-            $oper   = 'VIR';
-            $ref       = trim($data[6]);
-            $categorie = null; #(int) $data[3];
-            $transaction_id = null; #$data[7];
-            $bank_other = $data[13];
-            $iban_other = $data[12];
-            $owner_other = $data[11];
-            
-            $import_key = trim($transaction_id);
-            if(empty($import_key)) {
-                $import_key = implode('|', array(
-                    trim($iban_other),
-                    trim($owner_other),
-                    number_format($amount, 2, '.', ''),
-                    trim($label),
-                    trim($ref)
-                ));
-                $import_key = substr(sha1($import_key), 0, 14);
-            }
-            
-            $account = new Account($db);
-            $account->fetch($accountid);
-            $num_releve = null;
-            $amount_main_currency = null; #$data[15];
-            $note = '';
-            $sep = '';
-            if(!empty($data[8])) {
-                $note = $sep . 'Sammlerreferenz=' . $data[8];
-                $sep = ' ';
-            }
-            if(!empty($data[5])) {
-                $note = $sep . 'GlaeubigerId=' . $data[5];
-                $sep = ' ';
-            }
-            
-            $db->begin();
-            
-            $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."bank WHERE import_key = '".$db->escape($import_key)."'";
-            $resql = $db->query($sql);
-            
-            if ($resql->num_rows > 0) {
-                print '<p style="color:red">' . $langs->trans("BANKIMPORT_Msg_already_imported", $row) . '.</p>';
-                $db->rollback();
-            } else {
-                $bankline_id = $account->addline(
-                    $dateo,
-                    $oper,
-                    $label,
-                    $amount,
-                    $ref,
-                    $categorie,
-                    $user,
-                    $owner_other,
-                    $bank_other,
-                    $iban_other,
-                    $datev,
-                    $num_releve,
-                    $amount_main_currency,
-                    $note
-                    );
-                if ($bankline_id > 0) {
-                    $sql = "UPDATE ".MAIN_DB_PREFIX."bank SET import_key = '".$db->escape($import_key)."' WHERE rowid = ".((int) $bankline_id);
-                    $db->query($sql);
-                    $desc = $iban_other.", ".$owner_other.", ".$bank_other.", ".$amount;
-                    print '<p style="color:green">' . $langs->trans("BANKIMPORT_Msg_successfully_imported", $desc) . '</p>';
-                    $db->commit();
-                } else {
-                    print '<p style="color:red">' . $langs->trans("BANKIMPORT_Msg_error_in_line", $row, $db->error) . '</p>';
-                    $db->rollback();
-                }
-            }
-        }
-        fclose($handle);
-    } else {
-        print '<p style="color:red">' . $langs->trans("BANKIMPORT_Msg_could_not_open_file") . '</p>';
+print '</table>';
+print '</form>';
+
+// JavaScript validation
+print '<script type="text/javascript">
+document.addEventListener("DOMContentLoaded", function() {
+    var form = document.querySelector("form");
+    var accountSelect = document.querySelector("select[name=\'accountid\']");
+    var fileInput = document.querySelector("input[name=\'statement\']");
+    var submitButton = document.getElementById("submitButton");
+
+    // Disable submit button initially if no account selected
+    function updateSubmitButton() {
+        var hasAccount = accountSelect.value && accountSelect.value != "0";
+        var hasFile = fileInput.files && fileInput.files.length > 0;
+        submitButton.disabled = !hasAccount || !hasFile;
     }
-}
+
+    // Update submit button state when selections change
+    accountSelect.addEventListener("change", updateSubmitButton);
+    fileInput.addEventListener("change", updateSubmitButton);
+
+    // Initial state
+    updateSubmitButton();
+
+    form.addEventListener("submit", function(e) {
+        var isValid = true;
+        var errorMessages = [];
+
+        // Check if bank account is selected
+        if (!accountSelect.value || accountSelect.value == "0") {
+            errorMessages.push("' . $langs->trans("BANKIMPORT_Choose_account") . '");
+            accountSelect.focus();
+            isValid = false;
+        }
+
+        // Check if file is selected
+        if (!fileInput.files || fileInput.files.length === 0) {
+            errorMessages.push("' . $langs->trans("BANKIMPORT_Choose_file") . '");
+            if (isValid) fileInput.focus();
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            alert(errorMessages.join("\\n"));
+        }
+    });
+});
+</script>';
+
+// Display help information
+print '<br>';
+print '<div class="info">';
+print '<strong>'.$langs->trans("BANKIMPORT_Help_Title").'</strong><br>';
+print $langs->trans("BANKIMPORT_Help_Description").'<br><br>';
+print '<strong>'.$langs->trans("BANKIMPORT_Help_Format").'</strong><br>';
+print $langs->trans("BANKIMPORT_Help_Format_Details");
+print '</div>';
 
 llxFooter();
 $db->close();
