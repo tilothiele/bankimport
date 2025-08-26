@@ -1,0 +1,10 @@
+
+BANKIMPORT_Title=Bankauszüge importieren
+BANKIMPORT_Choose_account=Bitte zuerst ein Bankkonto auswählen!
+BANKIMPORT_Bank_account=Bankkonto
+BANKIMPORT_File_label=CSV-Datei (camt52v8)
+BANKIMPORT_Importieren_label=Importieren
+BANKIMPORT_Msg_already_imported=Zeile %d bereits importiert
+BANKIMPORT_Msg_could_not_open_file=Datei konnte nicht geöffnet werden
+BANKIMPORT_Msg_error_in_line=Fehler bei Zeile %d: %s
+BANKIMPORT_Msg_successfully_imported=Zeile erfolgreich importiert: %s

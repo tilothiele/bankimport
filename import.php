@@ -23,26 +23,26 @@ function ddmmyy2dol_date(string $s) {
 
 $langs->load("bankimport@bankimport");
 
-llxHeader('', 'Bankauszüge importieren');
+llxHeader('', $langs->trans("BANKIMPORT_Title"));
 
-print load_fiche_titre("Bankauszüge importieren");
+print load_fiche_titre($langs->trans("BANKIMPORT_Title"));
 
 // Bankkonto auswählen
 $accountid = GETPOST('accountid', 'int');
 $encoding  = GETPOST('encoding', 'alpha'); // UTF-8 oder ISO-8859-1
 
 if (empty($accountid)) {
-    print '<p style="color:red">Bitte zuerst ein Bankkonto auswählen!</p>';
+    print "<p style=\"color:red\">" . $langs->trans("BANKIMPORT_Choose_account") . "</p>";
 }
 
 $form = new Form($db);
 print '<form action="'.$_SERVER["PHP_SELF"].'" method="post" enctype="multipart/form-data">';
 print '<input type="hidden" name="token" value="'.newToken().'">';
-print 'Bankkonto: ';
+print $langs->trans("BANKIMPORT_Bank_account") . ': ';
 print $form->select_comptes($accountid, 'accountid', 0, '', 1, 0, 'all');
 
 // Upload
-print '<br><br>CSV-Datei (camt52v8): <input type="file" name="statement">';
+print '<br><br>' . $langs->trans("BANKIMPORT_File_label") . ': <input type="file" name="statement">';
 
 // Encoding Dropdown
 print '<br><br>Encoding: ';
@@ -54,7 +54,7 @@ foreach ($encodings as $key => $label) {
 }
 print '</select>';
 
-print '<br><br><input type="submit" class="button" value="Importieren">';
+print '<br><br><input type="submit" class="button" value="' . $langs->trans("BANKIMPORT_Importieren_label") . '">';
 print '</form><br>';
 
 // --- Upload behandeln ---
@@ -119,7 +119,7 @@ if (!empty($_FILES['statement']['tmp_name']) && $accountid > 0) {
             $resql = $db->query($sql);
             
             if ($resql->num_rows > 0) {
-                print '<p style="color:red">Zeile '.$row.': bereits importiert.</p>';
+                print '<p style="color:red">' . $langs->trans("BANKIMPORT_Msg_already_imported", $row) . '.</p>';
                 $db->rollback();
             } else {
                 $bankline_id = $account->addline(
@@ -142,17 +142,17 @@ if (!empty($_FILES['statement']['tmp_name']) && $accountid > 0) {
                     $sql = "UPDATE ".MAIN_DB_PREFIX."bank SET import_key = '".$db->escape($import_key)."' WHERE rowid = ".((int) $bankline_id);
                     $db->query($sql);
                     $desc = $iban_other.", ".$owner_other.", ".$bank_other.", ".$amount;
-                    print '<p style="color:green">Zeile erfolgreich importiert: '.$desc.'</p>';
+                    print '<p style="color:green">' . $langs->trans("BANKIMPORT_Msg_successfully_imported", $desc) . '</p>';
                     $db->commit();
                 } else {
-                    print '<p style="color:red">Fehler bei Zeile '.$row.': '.$account->error.'</p>';
+                    print '<p style="color:red">' . $langs->trans("BANKIMPORT_Msg_error_in_line", $row, $db->error) . '</p>';
                     $db->rollback();
                 }
             }
         }
         fclose($handle);
     } else {
-        print '<p style="color:red">Datei konnte nicht geöffnet werden.</p>';
+        print '<p style="color:red">' . $langs->trans("BANKIMPORT_Msg_could_not_open_file") . '</p>';
     }
 }
 

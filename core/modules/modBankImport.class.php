@@ -27,7 +27,7 @@ class modBankImport extends DolibarrModules
         $this->description = "Import von Kontoauszügen";
         $this->const_name = 'MAIN_MODULE_BANKIMPORT';
         $this->special = 0;
-        $this->picto = 'fa-money-bill-transfer'; // pictogram
+        $this->picto = 'bank-import-logo@bankimport'; // pictogram
         $this->editor_name = 'tilo.thiele@hamburg.de';
         
         // Default module options

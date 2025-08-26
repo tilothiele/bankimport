@@ -1,0 +1,10 @@
+
+BANKIMPORT_Title=Import bank statemens
+BANKIMPORT_Choose_account=You need to choose a bank account first!
+BANKIMPORT_Bank_account=Bank account
+BANKIMPORT_File_label=CSV-File (camt52v8)
+BANKIMPORT_Importieren_label=Import
+BANKIMPORT_Msg_already_imported=Line %d already imported
+BANKIMPORT_Msg_could_not_open_file=Error opening file
+BANKIMPORT_Msg_error_in_line=Error processing line %d: %s
+BANKIMPORT_Msg_successfully_imported=Line successfully imported: %s

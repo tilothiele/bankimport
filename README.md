@@ -1,13 +1,52 @@
-# Import von Kontoauszügen
+# Import of Bank Statement File
 
-Beispiel Importdatei (iso-8859-1)
+* The import file is a csv File. The first line ist skipped as headers.
+* Field separator is a semicolon ';'.
+* Record separator is newline '\n'.
+* String values may be quoted by "
+* Supported encoding s: ISO-8859-1, UTF-8
 
-```
-"Auftragskonto";"Buchungstag";"Valutadatum";"Buchungstext";"Verwendungszweck";"Glaeubiger ID";"Mandatsreferenz";"Kundenreferenz (End-to-End)";"Sammlerreferenz";"Lastschrift Ursprungsbetrag";"Auslagenersatz Ruecklastschrift";"Beguenstigter/Zahlungspflichtiger";"Kontonummer/IBAN";"BIC (SWIFT-Code)";"Betrag";"Waehrung";"Info"
-"DE82200505501139214280";"04.08.25";"04.08.25";"GUTSCHRIFT UEBERWEISUNG";"Martina Pilz ";"";"";"";"";"";"";"JOSEF HEINZ PILZ MARTINA PILZ";"DE54200505501335467997";"HASPDEHHXXX";"5,00";"EUR";"Umsatz gebucht"
-"DE82200505501139214280";"31.07.25";"01.08.25";"ABSCHLUSS";"Abrechnung 31.07.2025 siehe Anlage Abrechnung 31.07.2025 Information zur Abrechnung Kontostand am 31.07.2025 4.556,49 + Abrechnungszeitraum vom 01.07.2025 bis 31.07.2025 Abrechnung 31.07.2025 0,00+ Sollzinss�tze am 30.07.2025 13,5900 v.H. Soll-Zins 4,0000 v.H. �berz-Zins Es handelt sich hierbei um eine umsatzsteuerfreie Leistung. Kontostand/Rechnungsabschluss am 31.07.2025 4.556,49 + Rechnungsnummer: 20250731-HH001-00157275003 ";"";"";"";"";"";"";"";"1139214280";"20050550";"0,00";"EUR";"Umsatz gebucht"
-"DE82200505501139214280";"31.07.25";"01.08.25";"ENTGELTABSCHLUSS";"Entgeltabrechnung siehe Anlage Abrechnung 31.07.2025 Information zur Abrechnung Entgelte vom 01.07.2025 bis 31.07.2025 34,85- Grundpreis (Kontof�hrung) 15,50- Zahlungsverkehr 19,35- Abrechnung 31.07.2025 34,85- Es handelt sich hierbei um eine umsatzsteuerfreie Leistung. Rechnungsnummer: 20250731-HH001-00157275009 ";"";"";"";"";"";"";"";"0000000000";"20050550";"-34,85";"EUR";"Umsatz gebucht"
-date;datev;label;amount;oper;ref;categorie;transaction_id;bank_other;iban_other;owner_other
-2025-08-01;2025-08-01;Miete August;-850.00;VIR;REF001;Miete;TXN001;Deutsche Bank;DE12345678901234567890;Max Mustermann
-2025-08-02;2025-08-01;Gehalt August;2500.00;VIR;REF002;Gehalt;TXN002;Commerzbank;DE09876543210987654321;Musterfirma GmbH
-```
+Not all fields are getting imported. 
+The static mapping to Dolibarr fields:
+
+TBW
+
+# 📑 Record Description – Haspa CSV (camt.052 v8 Export)
+
+This document describes the structure of the CSV export file (Haspa, format camt.052 v8).
+
+---
+
+## Table of Fields
+
+| Field name | Description | Example |
+|------------|-------------|---------|
+| **Account** (`Auftragskonto`) | IBAN of the account for which the statement is created. | `DE82200505501139432180` |
+| **Booking Date** (`Buchungstag`) | Date on which the bank posts the transaction. | `04.08.25` |
+| **Value Date** (`Valutadatum`) | Value date (date relevant for interest calculation). | `04.08.25` |
+| **Booking Text** (`Buchungstext`) | Short text from the bank indicating the transaction type. | `GUTSCHRIFT UEBERWEISUNG` |
+| **Payment Purpose** (`Verwendungszweck`) | Purpose of payment or accounting text provided by the originator. | `Tina Pilz` |
+| **Creditor ID** (`Glaeubiger ID`) | SEPA Creditor Identifier (for SEPA direct debits). | *(empty in example)* |
+| **Mandate Reference** (`Mandatsreferenz`) | Mandate reference of the SEPA direct debit. | *(empty in example)* |
+| **Customer Reference (End-to-End)** | End-to-End reference from the originator. | *(empty in example)* |
+| **Collector Reference** (`Sammlerreferenz`) | Batch reference of a SEPA direct debit collection. | *(empty in example)* |
+| **Original Direct Debit Amount** (`Lastschrift Ursprungsbetrag`) | Original amount of the direct debit before chargeback. | *(empty in example)* |
+| **Chargeback Fee** (`Auslagenersatz Ruecklastschrift`) | Bank fee related to chargebacks. | *(empty in example)* |
+| **Counterparty Name** (`Beguenstigter/Zahlungspflichtiger`) | Name of the business partner (payer or payee). | `TINA PILZ` |
+| **Counterparty IBAN** (`Kontonummer/IBAN`) | IBAN of the business partner. | `DE54200505123435467997` |
+| **Counterparty BIC** (`BIC (SWIFT-Code)`) | BIC of the partner’s bank. | `HASPDEHHXXX` |
+| **Amount** (`Betrag`) | Transaction amount. Positive = credit (inflow), Negative = debit (outflow). | `5.00` |
+| **Currency** (`Waehrung`) | Currency of the transaction. | `EUR` |
+| **Info** | Status information, usually `"Umsatz gebucht"` (“transaction booked”). | `Umsatz gebucht` |
+
+---
+
+## Notes
+
+- **Positive amounts** = incoming funds (credits).  
+- **Negative amounts** = outgoing payments, charges, fees.  
+- Some fields are **only filled for SEPA direct debits** (e.g. *Creditor ID*, *Mandate Reference*, *Collector Reference*).  
+- **Booking Text + Payment Purpose** often need to be combined to fully identify the transaction.  
+- **Info** field is usually static (`Umsatz gebucht` = booked transaction).  
+
+---

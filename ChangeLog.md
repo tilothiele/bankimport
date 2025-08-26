@@ -1,5 +1,6 @@
 # Changelog for bankimport module
 
 
-## 1.0.0
+## 0.0.9
+
 Initial version
