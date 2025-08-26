@@ -1,6 +1,12 @@
 # Import of Bank Statement File
 
+Author: Tilo Thiele<tilo.thiele@hamburg.de>
+
 License: MIT (see License.txt
+
+Github: git@github.com:tilothiele/bankimport.git
+
+## Description
 
 * The import file is a csv File. The first line ist skipped as headers.
 * Field separator is a semicolon ';'.
@@ -13,13 +19,13 @@ The static mapping to Dolibarr fields:
 
 TBW
 
-# 📑 Record Description – Haspa CSV (camt.052 v8 Export)
+## 📑 Record Description – Haspa CSV (camt.052 v8 Export)
 
 This document describes the structure of the CSV export file (Haspa, format camt.052 v8).
 
 ---
 
-## Table of Fields
+### Table of Fields
 
 | Field name | Description | Example |
 |------------|-------------|---------|
@@ -43,7 +49,7 @@ This document describes the structure of the CSV export file (Haspa, format camt
 
 ---
 
-## Notes
+### Notes
 
 - **Positive amounts** = incoming funds (credits).  
 - **Negative amounts** = outgoing payments, charges, fees.  
