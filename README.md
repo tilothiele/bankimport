@@ -121,7 +121,7 @@ Bei Fragen oder Problemen:
 
 Siehe [ChangeLog.md](ChangeLog.md) für detaillierte Änderungen.
 
-### Version 1.0.0
+### Version 0.0.10
 - Erste Veröffentlichung
 - Unterstützung für camt.052 v8 Format
 - UTF-8 und ISO-8859-1 Kodierung

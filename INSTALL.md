@@ -122,11 +122,11 @@ Bei Problemen überprüfen Sie die Dolibarr-Logs:
 Bei Fragen oder Problemen:
 - **Autor**: Tilo Thiele
 - **E-Mail**: tilo.thiele@hamburg.de
-- **Lizenz**: GPL-3.0
+- **Lizenz**: MIT
 
 ## Changelog
 
-### Version 1.0.0
+### Version 0.0.10
 - Erste Veröffentlichung
 - Unterstützung für camt.052 v8 Format
 - UTF-8 und ISO-8859-1 Kodierung

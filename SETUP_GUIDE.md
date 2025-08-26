@@ -26,9 +26,9 @@ Nach der Aktivierung sollte das **Zahnrad-Symbol (⚙️)** neben dem Modulnamen
 Das Zahnrad-Symbol führt zur Konfigurationsseite des Moduls, wo Sie finden:
 
 ### Modul-Informationen
-- **Version**: 1.0.0
+- **Version**: 0.0.10
 - **Autor**: Tilo Thiele
-- **Lizenz**: GPL-3.0
+- **Lizenz**: MIT
 
 ### Konfiguration
 - **Maximale Dateigröße**: 10 MB
