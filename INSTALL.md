@@ -132,4 +132,4 @@ Bei Fragen oder Problemen:
 - UTF-8 und ISO-8859-1 Kodierung
 - Duplikat-Erkennung
 - Verbesserte Fehlerbehandlung
-- Mehrsprachige Unterstützung (Deutsch/Englisch)
+- Mehrsprachige Unterstützung (Deutsch/Englisch/Französisch)
