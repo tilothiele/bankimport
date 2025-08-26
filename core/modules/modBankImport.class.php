@@ -2,7 +2,8 @@
 /* BankImport minimal Module for Dolibarr */
 
 include_once DOL_DOCUMENT_ROOT . '/core/modules/DolibarrModules.class.php';
-require_once DOL_DOCUMENT_ROOT . '/custom/bankimport/core/modules/BankImportHelper.php';
+
+require_once __DIR__ . '/BankImportHelper.php';
 
 class modBankImport extends DolibarrModules
 {

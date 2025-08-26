@@ -43,12 +43,12 @@ jobs:
           mkdir -p dist/bankimport
           rsync -av --exclude 'dist' --exclude '.git' --exclude '.github' ./ dist/bankimport/
           cd dist
-          zip -r ../bankimport-$TAG.zip bankimport
+          zip -r ../module_bankimport-$TAG.zip bankimport
 
       # 6. Release mit ZIP
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: bankimport-*.zip
+          files: module_bankimport-*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
