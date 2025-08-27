@@ -2,7 +2,7 @@
 
 **Author**: Tilo Thiele <tilo.thiele@hamburg.de>
 **License**: MIT (see License.txt)
-**Github**: git@github.com:tilothiele/bankimport.git
+**Github**: https://github.com/tilothiele/bankimport
 
 ## Description
 
@@ -15,13 +15,12 @@ Das BankImport-Modul ermöglicht den Import von Bankauszügen im CSV-Format (cam
 - ✅ Automatische Erkennung und Vermeidung von Duplikaten
 - ✅ Validierung der CSV-Daten vor dem Import
 - ✅ Mehrsprachige Unterstützung (Deutsch/Englisch/Französisch)
-- ✅ Verbesserte Fehlerbehandlung und Logging
-- ✅ Sichere Datei-Upload-Validierung
+- ✅ Berechtigungen an das Bank-Modul gekoppelt
 
 ### System Requirements
 
 - **PHP**: 7.4 oder höher
-- **Dolibarr**: 16.0.0 oder höher
+- **Dolibarr**: 21.0.0 oder höher
 - **Aktiviertes Bank-Modul** in Dolibarr
 
 ## Installation

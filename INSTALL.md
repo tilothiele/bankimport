@@ -7,7 +7,7 @@ Das BankImport-Modul ermöglicht den Import von Bankauszügen im CSV-Format (cam
 ## Systemanforderungen
 
 - **PHP**: 7.4 oder höher
-- **Dolibarr**: 16.0.0 oder höher
+- **Dolibarr**: 21.0.0 oder höher
 - **Aktiviertes Bank-Modul** in Dolibarr
 
 ## Installation
@@ -25,18 +25,26 @@ Das BankImport-Modul ermöglicht den Import von Bankauszügen im CSV-Format (cam
    chown -R www-data:www-data /path/to/dolibarr/htdocs/custom/bankimport/
    ```
 
+oder:
+
+1. Melden Sie sich als Administrator in Dolibarr an
+2. Gehen Sie zu **Start** → **Setup** → **Module/Applications**
+3. Schalten Sie in den Tab **Externes Modul hinzufügen**
+4. Wählen Sie die Datei `module_bankimport-<version>.zip` und klicken Sie auf **Upload**
+
 ### 2. Modul aktivieren
 
 1. Melden Sie sich als Administrator in Dolibarr an
-2. Gehen Sie zu **Setup** → **Module/Applications**
+2. Gehen Sie zu **Start** → **Setup** → **Module/Applications**
 3. Suchen Sie nach "BankImport" in der Liste
 4. Klicken Sie auf **Aktivieren**
 
 ### 3. Berechtigungen konfigurieren
 
-1. Gehen Sie zu **Setup** → **Users & Groups** → **Permissions**
-2. Wählen Sie die gewünschte Benutzergruppe aus
-3. Aktivieren Sie die Berechtigung "Bankauszüge importieren" unter dem Bank-Modul
+1. Gehen Sie zu **Start** → **Setup** → **Users & Groups** → **Permissions**
+2. Wählen Sie den gewünschten Benutzer oder die gewünschte Benutzergruppe aus
+3. Klicken Sie auf den Tab **Berechtigungen**
+4. Aktivieren Sie die Berechtigung *Transaktionen erstellen/bearbeiten/löschen und vergleichen* unter dem Bank-Modul
 
 ## Verwendung
 
